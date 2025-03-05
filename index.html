@@ -172,7 +172,6 @@
         let filter = 'none';
         let photoDetails = [];
 
-        // Show Sweet Alert on first load
         document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
                 title: 'Selamat Datang di PhotoBooth!',
@@ -193,7 +192,6 @@
             document.body.style.zoom = "95%";
         });
 
-        // Camera flash function
         function triggerCameraFlash() {
             cameraFlash.style.opacity = '1';
             setTimeout(() => {
@@ -232,7 +230,6 @@
         }
 
         function capturePhoto(photoIndex, callback) {
-            // Trigger camera flash
             triggerCameraFlash();
 
             const canvas = document.createElement('canvas');
