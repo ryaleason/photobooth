@@ -6,11 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌈 Ryaleason 📸</title>
     <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background-color: #FFE6F2;
             font-family: 'Lalezar', cursive;
             color: #FF69B4;
+            background: linear-gradient(to right,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent),
+                linear-gradient(to top, #ffeafa, #ffe0f3);
+
+            background-position: right center, center;
+
+            background-size: 50% 100%, cover;
+
+            background-repeat: no-repeat;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -18,112 +30,90 @@
             align-items: center;
             min-height: 100vh;
         }
-    
+
         .container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
+            align-items: flex-start;
+            gap: 20px;
         }
-    
+
         .camera-section {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-    
+
         h1 {
             text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
-            font-size: 2em;
+            font-size: 2.5em;
             margin-bottom: 20px;
+            text-align: center;
         }
-    
+
         video {
             transform: scaleX(-1);
             border: 5px solid #FF69B4;
             border-radius: 15px;
-            width: 100%;
-            max-width: 300px;
-            height: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-    
-        .controls,
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-    
+
         button {
             background-color: #FF69B4;
             border: none;
             color: white;
-            padding: 6px 20px;
+            padding: 10px 20px;
+            margin: 5px;
             border-radius: 20px;
             cursor: pointer;
-            margin-top: 10px;
             transition: transform 0.2s;
             font-family: 'Lalezar', cursive;
         }
-    
+
         button:hover {
             transform: scale(1.1);
             background-color: #FF1493;
         }
-    
+
         .photo-strip {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            margin-top: 10px;
             gap: 10px;
-            margin-top: 20px;
             padding: 15px;
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             background-color: #FFB6C1;
-            max-width: 90%;
         }
-    
+
         .photo-strip img {
-            width: 100px;
+            width: 200px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
-    
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
         .countdown {
             font-size: 2em;
             color: #FF69B4;
             font-weight: bold;
             text-align: center;
-            margin-top: 10px;
         }
-    
+
         #backgroundColorPicker {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border: none;
-            margin-top: 20px;
             border-radius: 50%;
             cursor: pointer;
-        }
-    
-        @media (min-width: 768px) {
-            .container {
-                justify-content: center;
-                gap: 20px;
-            }
-    
-            .photo-strip {
-                max-width: 350px;
-                display: flex;
-                flex-direction: column;
-            }
-    
-            .photo-strip img {
-                width: 250px;
-            }
         }
     </style>
 </head>
@@ -132,25 +122,25 @@
     <div class="container">
         <div class="camera-section">
             <h1>🌈 PhotoBooth 📸</h1>
-            <video id="video" autoplay></video>
-    
+            <video id="video" width="400" height="300" autoplay></video>
+
             <div class="controls">
                 <button onclick="startPhotoSession()">✨ Mulai Foto ✨</button>
                 <input type="color" id="backgroundColorPicker" value="#FFB6C1" title="Choose Background Color">
             </div>
-    
+
             <div class="countdown" id="countdown"></div>
-    
+
             <div class="filters">
                 <button onclick="applyFilter('grayscale(100%)')">🌚 Grayscale</button>
-                <button onclick="applyFilter('sepia(100%)')">🍚 Sepia</button>
+                <button onclick="applyFilter('sepia(100%)')">🍪 Sepia</button>
                 <button onclick="applyFilter('hue-rotate(90deg)')">🌈 Rainbow</button>
                 <button onclick="applyFilter('none')">🔄 Reset</button>
             </div>
-    
+
             <button onclick="downloadPhotoStrip()">💾 Download Foto Disini</button>
         </div>
-    
+
         <div class="photo-strip" id="photoStrip"></div>
     </div>
 
@@ -161,6 +151,24 @@
         const backgroundColorPicker = document.getElementById('backgroundColorPicker');
         let filter = 'none';
         let photoDetails = [];
+
+        // Show Sweet Alert on first load
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                title: 'Selamat Datang di PhotoBooth!',
+                html: `
+                    <p>Ayo buat foto kenangan kamu dengan PhotoBooth 📸✨</p>
+                    <p>Follow Instagram gwehj 🗿: <a href="https://www.instagram.com/ryaleason_?igsh=Y24za2VtM281OXU4" target="_blank">@ryaleason</a> 🌈</p>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Ayo Mulai!',
+                background: '#FFE6F2',
+                customClass: {
+                    title: 'swal-title',
+                    content: 'swal-text'
+                }
+            });
+        });
 
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => { video.srcObject = stream; })
@@ -303,7 +311,7 @@
 
 
                 const link = document.createElement('a');
-                link.download = '🌈_photobooth_memories.png';
+                link.download = '🌈_photobooth_ryaleason.png';
                 link.href = stripCanvas.toDataURL('image/png');
                 link.click();
             });
@@ -314,3 +322,5 @@
         });
     </script>
 </body>
+
+</html>
