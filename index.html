@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>🌈 Ryaleason 📸</title>
     <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -20,7 +20,7 @@
 
             background-position: right center, center;
 
-            background-size: 50% 100%, cover;
+            background-size: 50% 1200%, cover;
 
             background-repeat: no-repeat;
             margin: 0;
@@ -115,10 +115,25 @@
             border-radius: 50%;
             cursor: pointer;
         }
+
+        /* Camera flash effect */
+        .camera-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.2s ease;
+        }
     </style>
 </head>
 
 <body>
+    <div class="camera-flash" id="cameraFlash"></div>
     <div class="container">
         <div class="camera-section">
             <h1>🌈 PhotoBooth 📸</h1>
@@ -149,6 +164,7 @@
         const photoStrip = document.getElementById('photoStrip');
         const countdownEl = document.getElementById('countdown');
         const backgroundColorPicker = document.getElementById('backgroundColorPicker');
+        const cameraFlash = document.getElementById('cameraFlash');
         let filter = 'none';
         let photoDetails = [];
 
@@ -169,6 +185,17 @@
                 }
             });
         });
+        document.addEventListener("DOMContentLoaded", function () {
+            document.body.style.zoom = "95%";
+        });
+
+        // Camera flash function
+        function triggerCameraFlash() {
+            cameraFlash.style.opacity = '1';
+            setTimeout(() => {
+                cameraFlash.style.opacity = '0';
+            }, 100);
+        }
 
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => { video.srcObject = stream; })
@@ -201,6 +228,9 @@
         }
 
         function capturePhoto(photoIndex, callback) {
+            // Trigger camera flash
+            triggerCameraFlash();
+
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = video.videoWidth / 2;
