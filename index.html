@@ -346,7 +346,6 @@
                         link.href = stripCanvas.toDataURL('image/png');
                         link.click();
                     } else if (format === 'pdf') {
-                        // Use jsPDF with proper import
                         const { jsPDF } = window.jspdf;
                         const pdf = new jsPDF({
                             orientation: 'portrait',
