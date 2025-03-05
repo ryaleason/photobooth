@@ -119,7 +119,6 @@
             cursor: pointer;
         }
 
-        /* Camera flash effect */
         .camera-flash {
             position: fixed;
             top: 0;
@@ -132,6 +131,21 @@
             z-index: 9999;
             transition: opacity 0.2s ease;
         }
+
+        .hidden {
+            display: none;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:disabled:hover {
+            transform: none;
+            background-color: #cccccc;
+        }
     </style>
 </head>
 
@@ -143,21 +157,23 @@
             <video id="video" width="400" height="300" autoplay></video>
 
             <div class="controls">
-                <button onclick="startPhotoSession()">✨ Mulai Foto ✨</button>
+                <button id="startButton" onclick="startPhotoSession()">✨ Mulai Foto ✨</button>
                 <input type="color" id="backgroundColorPicker" value="#FFB6C1" title="Choose Background Color">
             </div>
 
             <div class="countdown" id="countdown"></div>
 
-            <div class="filters">
+            <div class="filters" id="filtersSection">
                 <button onclick="applyFilter('grayscale(100%)')">🌚 Grayscale</button>
                 <button onclick="applyFilter('sepia(100%)')">🍪 Sepia</button>
                 <button onclick="applyFilter('hue-rotate(90deg)')">🌈 Rainbow</button>
                 <button onclick="applyFilter('none')">🔄 Reset</button>
             </div>
 
-            <button onclick="downloadPhotoStrip('png')">💾 Download Foto Disini</button>
-            <button onclick="downloadPhotoStrip('pdf')">📄 Download PDF</button>
+            <div class="download-buttons hidden" id="downloadButtons">
+                <button onclick="downloadPhotoStrip('png')">💾 Download Foto Disini</button>
+                <button onclick="downloadPhotoStrip('pdf')">📄 Download PDF</button>
+            </div>
         </div>
 
         <div class="photo-strip" id="photoStrip"></div>
@@ -169,8 +185,14 @@
         const countdownEl = document.getElementById('countdown');
         const backgroundColorPicker = document.getElementById('backgroundColorPicker');
         const cameraFlash = document.getElementById('cameraFlash');
+        const startButton = document.getElementById('startButton');
+        const downloadButtons = document.getElementById('downloadButtons');
+        const filtersSection = document.getElementById('filtersSection');
+
         let filter = 'none';
         let photoDetails = [];
+        let isPhotoSessionActive = false;
+        let isCameraAllowed = false;
 
         document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
@@ -187,10 +209,25 @@
                     content: 'swal-text'
                 }
             });
-        });
-        document.addEventListener("DOMContentLoaded", function () {
+
             document.body.style.zoom = "95%";
+
+            downloadButtons.classList.add('hidden');
+
+            initializeCamera();
         });
+
+        function initializeCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    isCameraAllowed = true;
+                })
+                .catch(err => {
+                    console.error("Camera access error:", err);
+                    isCameraAllowed = false;
+                });
+        }
 
         function triggerCameraFlash() {
             cameraFlash.style.opacity = '1';
@@ -199,18 +236,39 @@
             }, 100);
         }
 
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => { video.srcObject = stream; })
-            .catch(err => alert("🙈 Oops! Camera access denied. Please check permissions."));
-
         function startPhotoSession() {
+            if (!isCameraAllowed) {
+                Swal.fire({
+                    title: 'Akses Kamera Diperlukan!',
+                    text: 'Mohon izinkan akses kamera untuk menggunakan PhotoBooth.',
+                    icon: 'warning',
+                    confirmButtonText: 'Izinkan Kamera',
+                    background: '#FFE6F2'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        initializeCamera();
+                    }
+                });
+                return;
+            }
+
+            if (isPhotoSessionActive) return;
+
+            isPhotoSessionActive = true;
+            startButton.disabled = true;
             photoStrip.innerHTML = '';
             photoDetails = [];
+
+            downloadButtons.classList.add('hidden');
+
             takePhotoWithCountdown(0);
         }
 
         function takePhotoWithCountdown(photoIndex) {
-            if (photoIndex >= 3) return;
+            if (photoIndex >= 3) {
+                completePhotoSession();
+                return;
+            }
 
             let count = 3;
             countdownEl.textContent = count;
@@ -239,125 +297,159 @@
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
 
-            ctx.filter = filter;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+            const filteredCanvas = document.createElement('canvas');
+            const filteredCtx = filteredCanvas.getContext('2d');
+            filteredCanvas.width = canvas.width;
+            filteredCanvas.height = canvas.height;
+
+            filteredCtx.drawImage(canvas, 0, 0);
+
+            if (filter !== 'none') {
+                filteredCtx.filter = filter;
+                filteredCtx.drawImage(filteredCanvas, 0, 0);
+                filteredCtx.filter = 'none';
+            }
+
             const img = document.createElement('img');
-            img.src = canvas.toDataURL('image/png');
+            img.src = filteredCanvas.toDataURL('image/png');
+
             img.style.filter = filter;
             photoStrip.appendChild(img);
 
             photoDetails.push({
-                dataUrl: img.src,
-                filter: filter
+                dataUrl: canvas.toDataURL('image/png'), 
+                filter: filter 
             });
 
             if (callback) callback();
         }
 
+        function completePhotoSession() {
+            startButton.textContent = "✨ Foto Kembali ✨";
+            startButton.disabled = false;
+            isPhotoSessionActive = false;
+
+            downloadButtons.classList.remove('hidden');
+        }
+
         function applyFilter(newFilter) {
             filter = newFilter;
-            const images = photoStrip.getElementsByTagName('img');
-            for (let img of images) {
+
+            video.style.filter = newFilter;
+
+            const images = photoStrip.querySelectorAll('img');
+            images.forEach((img, index) => {
                 img.style.filter = newFilter;
-            }
+
+                if (photoDetails[index]) {
+                    photoDetails[index].filter = newFilter;
+                }
+            });
         }
 
         function downloadPhotoStrip(format = 'png') {
-                const stripCanvas = document.createElement('canvas');
-                const ctx = stripCanvas.getContext('2d');
+            const stripCanvas = document.createElement('canvas');
+            const ctx = stripCanvas.getContext('2d');
 
-                if (photoDetails.length === 0) return;
+            const images = photoDetails.map(detail => {
+                const img = new Image();
+                img.src = detail.dataUrl;
+                return { img, filter: detail.filter };  
+            });
 
-                const images = photoDetails.map(detail => {
-                    const img = new Image();
-                    img.src = detail.dataUrl;
-                    return { img, filter: detail.filter };
+            const imgWidth = video.videoWidth / 2;
+            const imgHeight = video.videoHeight / 2;
+
+            const borderWidth = 20;
+            const borderRadius = 10;
+            const shadowBlur = 6;
+            const shadowOffset = 4;
+            const gap = 10;
+
+            stripCanvas.width = imgWidth + 2 * borderWidth;
+            stripCanvas.height = imgHeight * images.length + (images.length - 1) * gap + 2 * borderWidth;
+
+            ctx.fillStyle = backgroundColorPicker.value;
+            ctx.fillRect(0, 0, stripCanvas.width, stripCanvas.height);
+
+            function roundedRect(ctx, x, y, width, height, radius) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.arcTo(x + width, y, x + width, y + height, radius);
+                ctx.arcTo(x + width, y + height, x, y + height, radius);
+                ctx.arcTo(x, y + height, x, y, radius);
+                ctx.arcTo(x, y, x + width, y, radius);
+                ctx.closePath();
+            }
+
+            Promise.all(images.map(item => new Promise(resolve => {
+                item.img.onload = () => resolve(item);
+            }))).then(loadedImages => {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+
+                loadedImages.forEach((item, index) => {
+                    const x = borderWidth;
+                    const y = borderWidth + index * (imgHeight + gap);
+
+                    ctx.shadowColor = 'rgba(0, 0, 0, 1)';
+                    ctx.shadowBlur = shadowBlur;
+                    ctx.shadowOffsetX = shadowOffset;
+                    ctx.shadowOffsetY = shadowOffset;
+
+                    ctx.save();
+                    roundedRect(ctx, x, y, imgWidth, imgHeight, borderRadius);
+                    ctx.clip();
+
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+
+                    tempCanvas.width = imgWidth;
+                    tempCanvas.height = imgHeight;
+
+                    if (item.filter !== 'none') {
+                        tempCtx.filter = item.filter;
+                    } else {
+                        tempCtx.filter = 'none';
+                    }
+
+                    tempCtx.drawImage(item.img, 0, 0, imgWidth, imgHeight);
+
+                    tempCtx.filter = 'none';
+
+                    ctx.drawImage(
+                        tempCanvas,
+                        x,
+                        y,
+                        imgWidth,
+                        imgHeight
+                    );
+
+                    ctx.restore();
                 });
 
-                const imgWidth = video.videoWidth / 2;
-                const imgHeight = video.videoHeight / 2;
-
-                const borderWidth = 20;
-                const borderRadius = 10;
-                const shadowBlur = 6;
-                const shadowOffset = 4;
-                const gap = 10;
-
-                stripCanvas.width = imgWidth + 2 * borderWidth;
-                stripCanvas.height = imgHeight * images.length + (images.length - 1) * gap + 2 * borderWidth;
-
-                ctx.fillStyle = backgroundColorPicker.value;
-                ctx.fillRect(0, 0, stripCanvas.width, stripCanvas.height);
-
-                function roundedRect(ctx, x, y, width, height, radius) {
-                    ctx.beginPath();
-                    ctx.moveTo(x + radius, y);
-                    ctx.arcTo(x + width, y, x + width, y + height, radius);
-                    ctx.arcTo(x + width, y + height, x, y + height, radius);
-                    ctx.arcTo(x, y + height, x, y, radius);
-                    ctx.arcTo(x, y, x + width, y, radius);
-                    ctx.closePath();
-                }
-
-                Promise.all(images.map(item => new Promise(resolve => {
-                    item.img.onload = () => resolve(item);
-                }))).then(loadedImages => {
-                    const tempCanvas = document.createElement('canvas');
-                    const tempCtx = tempCanvas.getContext('2d');
-
-                    loadedImages.forEach((item, index) => {
-                        const x = borderWidth;
-                        const y = borderWidth + index * (imgHeight + gap);
-
-                        ctx.shadowColor = 'rgba(0, 0, 0, 1)';
-                        ctx.shadowBlur = shadowBlur;
-                        ctx.shadowOffsetX = shadowOffset;
-                        ctx.shadowOffsetY = shadowOffset;
-
-                        ctx.save();
-                        roundedRect(ctx, x, y, imgWidth, imgHeight, borderRadius);
-                        ctx.clip();
-
-                        ctx.shadowColor = 'transparent';
-                        ctx.shadowBlur = 0;
-                        ctx.shadowOffsetX = 0;
-                        ctx.shadowOffsetY = 0;
-
-                        tempCanvas.width = imgWidth;
-                        tempCanvas.height = imgHeight;
-                        tempCtx.filter = item.filter;
-                        tempCtx.drawImage(item.img, 0, 0, imgWidth, imgHeight);
-
-                        ctx.drawImage(
-                            tempCanvas,
-                            x,
-                            y,
-                            imgWidth,
-                            imgHeight
-                        );
-
-                        ctx.restore();
+                if (format === 'png') {
+                    const link = document.createElement('a');
+                    link.download = '🌈_photobooth_ryaleason.png';
+                    link.href = stripCanvas.toDataURL('image/png');
+                    link.click();
+                } else if (format === 'pdf') {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'px',
+                        format: [stripCanvas.width, stripCanvas.height]
                     });
 
-                    if (format === 'png') {
-                        const link = document.createElement('a');
-                        link.download = '🌈_photobooth_ryaleason.png';
-                        link.href = stripCanvas.toDataURL('image/png');
-                        link.click();
-                    } else if (format === 'pdf') {
-                        const { jsPDF } = window.jspdf;
-                        const pdf = new jsPDF({
-                            orientation: 'portrait',
-                            unit: 'px',
-                            format: [stripCanvas.width, stripCanvas.height]
-                        });
-
-                        pdf.addImage(stripCanvas.toDataURL('image/png'), 'PNG', 0, 0, stripCanvas.width, stripCanvas.height);
-                        pdf.save('🌈_photobooth_ryaleason.pdf');
-                    }
-                });
-            }
+                    pdf.addImage(stripCanvas.toDataURL('image/png'), 'PNG', 0, 0, stripCanvas.width, stripCanvas.height);
+                    pdf.save('🌈_photobooth_ryaleason.pdf');
+                }
+            });
+        }
 
         backgroundColorPicker.addEventListener('input', function () {
             photoStrip.style.backgroundColor = this.value;
