@@ -4,28 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>🌈 Ryaleason 📸</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
+    <title>📷 Professional PhotoBooth 📸</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         body {
-            background-color: #FFE6F2;
-            font-family: 'Lalezar', cursive;
-            color: #FF69B4;
-            background: linear-gradient(to right,
-                    transparent,
-                    rgba(255, 255, 255, 0.2),
-                    transparent),
-                linear-gradient(to top, #ffeafa, #ffe0f3);
-
-            background-position: right center, center;
-
-            background-size: 50% 1200%, cover;
-
-            background-repeat: no-repeat;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -34,10 +23,27 @@
             min-height: 100vh;
         }
 
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 25%, #90caf9 50%, #64b5f6 75%, #42a5f5 100%);
+            z-index: -1;
+        }
+
         .container {
             display: flex;
             align-items: flex-start;
-            gap: 20px;
+            gap: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .camera-section {
@@ -47,34 +53,44 @@
         }
 
         h1 {
-            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
-            font-size: 2.5em;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 25px;
             text-align: center;
+            letter-spacing: -0.02em;
         }
 
         video {
             transform: scaleX(-1);
-            border: 5px solid #FF69B4;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 3px solid #1976d2;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(25, 118, 210, 0.2);
+            background: white;
         }
 
         button {
-            background-color: #FF69B4;
+            background: linear-gradient(135deg, #1976d2, #1565c0);
             border: none;
             color: white;
-            padding: 10px 20px;
-            margin: 5px;
-            border-radius: 20px;
+            padding: 12px 24px;
+            margin: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.2s;
-            font-family: 'Lalezar', cursive;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
         }
 
         button:hover {
-            transform: scale(1.1);
-            background-color: #FF1493;
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
         }
 
         .photo-strip {
@@ -83,40 +99,45 @@
             justify-content: center;
             align-items: center;
             margin-top: 80px;
-            gap: 10px;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            background-color: #FFB6C1;
+            gap: 12px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 1px solid #cbd5e1;
         }
 
         .photo-strip img {
             width: 200px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 2px solid white;
         }
 
         .controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 15px;
+            margin: 20px 0;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .countdown {
-            font-size: 2em;
-            color: #FF69B4;
-            font-weight: bold;
+            font-size: 2.5em;
+            color: #1976d2;
+            font-weight: 700;
             text-align: center;
+            text-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
         }
 
         #backgroundColorPicker {
             width: 50px;
             height: 50px;
-            border: none;
-            border-radius: 50%;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
         }
 
         .camera-flash {
@@ -137,14 +158,73 @@
         }
 
         button:disabled {
-            background-color: #cccccc;
+            background: linear-gradient(135deg, #94a3b8, #64748b);
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         button:disabled:hover {
             transform: none;
-            background-color: #cccccc;
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            box-shadow: none;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .filters button {
+            padding: 8px 16px;
+            font-size: 13px;
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+        }
+
+        .filters button:hover {
+            background: linear-gradient(135deg, #42a5f5, #2196f3);
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .download-buttons button {
+            background: linear-gradient(135deg, #0d47a1, #1565c0);
+        }
+
+        .download-buttons button:hover {
+            background: linear-gradient(135deg, #0a3d91, #0d47a1);
+        }
+
+        /* Professional styling for SweetAlert */
+        .swal2-popup {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(25, 118, 210, 0.2) !important;
+        }
+
+        .swal2-title {
+            color: #1565c0 !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+        }
+
+        .swal2-content {
+            color: #475569 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, #1976d2, #1565c0) !important;
+            border: none !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
         }
     </style>
 </head>
@@ -153,25 +233,25 @@
     <div class="camera-flash" id="cameraFlash"></div>
     <div class="container">
         <div class="camera-section">
-            <h1>🌈 PhotoBooth 📸</h1>
+            <h1>📷 Professional PhotoBooth</h1>
             <video id="video" width="400" height="300" autoplay></video>
 
             <div class="controls">
-                <button id="startButton" onclick="startPhotoSession()">✨ Mulai Foto ✨</button>
-                <input type="color" id="backgroundColorPicker" value="#FFB6C1" title="Choose Background Color">
+                <button id="startButton" onclick="startPhotoSession()">📸 Start Photo Session</button>
+                <input type="color" id="backgroundColorPicker" value="#f8fafc" title="Choose Background Color">
             </div>
 
             <div class="countdown" id="countdown"></div>
 
             <div class="filters" id="filtersSection">
-                <button onclick="applyFilter('grayscale(100%)')">🌚 Grayscale</button>
-                <button onclick="applyFilter('sepia(100%)')">🍪 Sepia</button>
-                <button onclick="applyFilter('hue-rotate(90deg)')">🌈 Rainbow</button>
-                <button onclick="applyFilter('none')">🔄 Reset</button>
+                <button onclick="applyFilter('grayscale(100%)')">⚫ Grayscale</button>
+                <button onclick="applyFilter('sepia(100%)')">🟤 Sepia</button>
+                <button onclick="applyFilter('hue-rotate(90deg)')">🎨 Color Shift</button>
+                <button onclick="applyFilter('none')">🔄 Original</button>
             </div>
 
             <div class="download-buttons hidden" id="downloadButtons">
-                <button onclick="downloadPhotoStrip('png')">💾 Download Foto Disini</button>
+                <button onclick="downloadPhotoStrip('png')">💾 Download Images</button>
                 <button onclick="downloadPhotoStrip('pdf')">📄 Download PDF</button>
             </div>
         </div>
@@ -196,14 +276,14 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
-                title: 'Selamat Datang di PhotoBooth!',
+                title: 'Welcome to Professional PhotoBooth!',
                 html: `
-                    <p>Ayo buat foto kenangan kamu dengan PhotoBooth 📸✨</p>
-                    <p>Follow Instagram gwehj 🗿: <a href="https://www.instagram.com/ryaleason_?igsh=Y24za2VtM281OXU4" target="_blank">@ryaleason</a> 🌈</p>
+                    <p>Create professional quality photo memories with our advanced PhotoBooth system</p>
+                    <p>Follow our creator: <a href="https://www.instagram.com/ryaleason_?igsh=Y24za2VtM281OXU4" target="_blank" style="color: #1976d2; text-decoration: none;">@ryaleason</a></p>
                 `,
                 icon: 'info',
-                confirmButtonText: 'Ayo Mulai!',
-                background: '#FFE6F2',
+                confirmButtonText: 'Get Started',
+                background: 'rgba(255, 255, 255, 0.95)',
                 customClass: {
                     title: 'swal-title',
                     content: 'swal-text'
@@ -229,21 +309,21 @@
                 });
         }
 
-        function triggerCameraFlash() {
+       function triggerCameraFlash() {
             cameraFlash.style.opacity = '1';
             setTimeout(() => {
                 cameraFlash.style.opacity = '0';
             }, 100);
         }
 
-        function startPhotoSession() {
+         function startPhotoSession() {
             if (!isCameraAllowed) {
                 Swal.fire({
-                    title: 'Akses Kamera Diperlukan!',
-                    text: 'Mohon izinkan akses kamera untuk menggunakan PhotoBooth.',
+                    title: 'Camera Access Required!',
+                    text: 'Please allow camera access to use the PhotoBooth.',
                     icon: 'warning',
-                    confirmButtonText: 'Izinkan Kamera',
-                    background: '#FFE6F2'
+                    confirmButtonText: 'Allow Camera',
+                    background: 'rgba(255, 255, 255, 0.95)'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         initializeCamera();
@@ -327,7 +407,7 @@
         }
 
         function completePhotoSession() {
-            startButton.textContent = "✨ Foto Kembali ✨";
+            startButton.textContent = "📸 Take More Photos";
             startButton.disabled = false;
             isPhotoSessionActive = false;
 
@@ -434,7 +514,7 @@
 
                 if (format === 'png') {
                     const link = document.createElement('a');
-                    link.download = '🌈_photobooth_ryaleason.png';
+                    link.download = 'professional_photobooth_ryaleason.png';
                     link.href = stripCanvas.toDataURL('image/png');
                     link.click();
                 } else if (format === 'pdf') {
@@ -446,7 +526,7 @@
                     });
 
                     pdf.addImage(stripCanvas.toDataURL('image/png'), 'PNG', 0, 0, stripCanvas.width, stripCanvas.height);
-                    pdf.save('🌈_photobooth_ryaleason.pdf');
+                    pdf.save('professional_photobooth_ryaleason.pdf');
                 }
             });
         }
