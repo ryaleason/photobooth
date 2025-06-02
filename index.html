@@ -64,12 +64,16 @@
             letter-spacing: -0.02em;
         }
 
+        /* UKURAN VIDEO KAMERA - INI YANG MENGATUR UKURAN KAMERA */
         video {
             transform: scaleX(-1);
             border: 3px solid #1976d2;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(25, 118, 210, 0.2);
             background: white;
+            width: 640px;  /* Ukuran lebar diperbesar dari 500px */
+            height: 480px; /* Ukuran tinggi diperbesar dari 300px */
+            object-fit: cover; /* Memastikan video tidak terdistorsi */
         }
 
         button {
@@ -108,7 +112,7 @@
         }
 
         .photo-strip img {
-            width: 200px;
+            width: 250px;  /* Ukuran foto di strip juga diperbesar */
             border-radius: 8px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             border: 2px solid white;
@@ -226,6 +230,34 @@
             font-family: 'Inter', sans-serif !important;
             font-weight: 500 !important;
         }
+
+        /* Responsive untuk layar kecil */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            video {
+                width: 480px;
+                height: 360px;
+            }
+            
+            .photo-strip img {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            video {
+                width: 320px;
+                height: 240px;
+            }
+            
+            .photo-strip img {
+                width: 160px;
+            }
+        }
     </style>
 </head>
 
@@ -234,7 +266,8 @@
     <div class="container">
         <div class="camera-section">
             <h1>📷 Professional PhotoBooth</h1>
-            <video id="video" width="500" height="300" autoplay></video>
+            <!-- UKURAN VIDEO JUGA BISA DIATUR DI SINI -->
+            <video id="video" width="640" height="480" autoplay></video>
 
             <div class="controls">
                 <button id="startButton" onclick="startPhotoSession()">📸 Start Photo Session</button>
@@ -298,7 +331,13 @@
         });
 
         function initializeCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true })
+            // RESOLUSI KAMERA BISA DIATUR DI SINI
+            navigator.mediaDevices.getUserMedia({ 
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            })
                 .then(stream => {
                     video.srcObject = stream;
                     isCameraAllowed = true;
@@ -372,8 +411,9 @@
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 800;
-            canvas.height = 600;
+            // UKURAN CANVAS UNTUK CAPTURE FOTO
+            canvas.width = 1280;
+            canvas.height = 720;
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
 
