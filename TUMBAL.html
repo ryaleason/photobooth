@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>📷 PhotoBooth 📸</title>
+    <title>📷 Professional PhotoBooth 📸</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -21,6 +21,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow-y: hidden;
         }
 
         body::before {
@@ -64,16 +65,15 @@
             letter-spacing: -0.02em;
         }
 
-        /* UKURAN VIDEO KAMERA - INI YANG MENGATUR UKURAN KAMERA */
         video {
             transform: scaleX(-1);
             border: 3px solid #1976d2;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(25, 118, 210, 0.2);
             background: white;
-            width: 640px;  /* Ukuran lebar diperbesar dari 500px */
-            height: 480px; /* Ukuran tinggi diperbesar dari 300px */
-            object-fit: cover; /* Memastikan video tidak terdistorsi */
+            width: 640px;
+            height: 480px;
+            object-fit: cover;
         }
 
         button {
@@ -112,7 +112,7 @@
         }
 
         .photo-strip img {
-            width: 250px;  /* Ukuran foto di strip juga diperbesar */
+            width: 250px;
             border-radius: 8px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             border: 2px solid white;
@@ -144,7 +144,6 @@
             box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
         }
 
-       
         .hidden {
             display: none;
         }
@@ -188,7 +187,7 @@
             justify-content: center;
         }
 
-         .camera-flash {
+        .camera-flash {
             position: fixed;
             top: 0;
             left: 0;
@@ -220,7 +219,7 @@
                 transform: scale(1);
             }
         }
-        
+
         .download-buttons button {
             background: linear-gradient(135deg, #0d47a1, #1565c0);
         }
@@ -229,7 +228,6 @@
             background: linear-gradient(135deg, #0a3d91, #0d47a1);
         }
 
-        /* WhatsApp button styling */
         .whatsapp-button {
             background: linear-gradient(135deg, #25d366, #128c7e) !important;
         }
@@ -238,7 +236,6 @@
             background: linear-gradient(135deg, #128c7e, #075e54) !important;
         }
 
-        /* Professional styling for SweetAlert */
         .swal2-popup {
             background: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(10px) !important;
@@ -276,7 +273,22 @@
             box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1) !important;
         }
 
-        /* Responsive untuk layar kecil */
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #25d366;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -311,7 +323,6 @@
     <div class="container">
         <div class="camera-section">
             <h1>📷 Professional PhotoBooth</h1>
-            <!-- UKURAN VIDEO JUGA BISA DIATUR DI SINI -->
             <video id="video" width="640" height="480" autoplay></video>
 
             <div class="controls">
@@ -330,7 +341,7 @@
 
             <div class="download-buttons hidden" id="downloadButtons">
                 <button onclick="downloadPhotoStrip('png')">💾 Download Images</button>
-             <button onclick="window.location.href='refrence.html'">📄 Refrensi Gaya</button>
+                <button onclick="downloadPhotoStrip('pdf')">📄 Download PDF</button>
                 <button class="whatsapp-button" onclick="shareToWhatsApp()">📱 Share to WhatsApp</button>
             </div>
         </div>
@@ -353,6 +364,7 @@
         let isPhotoSessionActive = false;
         let isCameraAllowed = false;
         let currentPhotoStripDataUrl = null;
+        let currentPhotoBlob = null;
 
         document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
@@ -371,14 +383,11 @@
             });
 
             document.body.style.zoom = "95%";
-
             downloadButtons.classList.add('hidden');
-
             initializeCamera();
         });
 
         function initializeCamera() {
-            // RESOLUSI KAMERA BISA DIATUR DI SINI
             navigator.mediaDevices.getUserMedia({ 
                 video: {
                     width: { ideal: 1280 },
@@ -395,14 +404,14 @@
                 });
         }
 
-       function triggerCameraFlash() {
+        function triggerCameraFlash() {
             cameraFlash.classList.add('active');
             setTimeout(() => {
                 cameraFlash.classList.remove('active');
-            }, 400); // Sesuaikan dengan durasi animasi CSS (0.4s)
+            }, 400);
         }
 
-         function startPhotoSession() {
+        function startPhotoSession() {
             if (!isCameraAllowed) {
                 Swal.fire({
                     title: 'Camera Access Required!',
@@ -426,7 +435,6 @@
             photoDetails = [];
 
             downloadButtons.classList.add('hidden');
-
             takePhotoWithCountdown(0);
         }
 
@@ -458,7 +466,6 @@
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            // UKURAN CANVAS UNTUK CAPTURE FOTO
             canvas.width = 1280;
             canvas.height = 720;
             ctx.translate(canvas.width, 0);
@@ -498,27 +505,22 @@
             startButton.disabled = false;
             isPhotoSessionActive = false;
 
-            // Generate photo strip for WhatsApp sharing
             generatePhotoStripForSharing();
-
             downloadButtons.classList.remove('hidden');
         }
 
         function applyFilter(newFilter) {
             filter = newFilter;
-
             video.style.filter = newFilter;
 
             const images = photoStrip.querySelectorAll('img');
             images.forEach((img, index) => {
                 img.style.filter = newFilter;
-
                 if (photoDetails[index]) {
                     photoDetails[index].filter = newFilter;
                 }
             });
 
-            // Regenerate photo strip when filter changes
             if (photoDetails.length > 0) {
                 generatePhotoStripForSharing();
             }
@@ -536,7 +538,6 @@
 
             const imgWidth = video.videoWidth / 2;
             const imgHeight = video.videoHeight / 2;
-
             const borderWidth = 20;
             const borderRadius = 10;
             const shadowBlur = 6;
@@ -593,22 +594,16 @@
                     }
 
                     tempCtx.drawImage(item.img, 0, 0, imgWidth, imgHeight);
-
                     tempCtx.filter = 'none';
 
-                    ctx.drawImage(
-                        tempCanvas,
-                        x,
-                        y,
-                        imgWidth,
-                        imgHeight
-                    );
-
+                    ctx.drawImage(tempCanvas, x, y, imgWidth, imgHeight);
                     ctx.restore();
                 });
 
-                // Store the photo strip data URL for WhatsApp sharing
                 currentPhotoStripDataUrl = stripCanvas.toDataURL('image/png');
+                stripCanvas.toBlob((blob) => {
+                    currentPhotoBlob = blob;
+                }, 'image/png', 0.95);
             });
         }
 
@@ -624,7 +619,6 @@
 
             const imgWidth = video.videoWidth / 2;
             const imgHeight = video.videoHeight / 2;
-
             const borderWidth = 20;
             const borderRadius = 10;
             const shadowBlur = 6;
@@ -681,17 +675,9 @@
                     }
 
                     tempCtx.drawImage(item.img, 0, 0, imgWidth, imgHeight);
-
                     tempCtx.filter = 'none';
 
-                    ctx.drawImage(
-                        tempCanvas,
-                        x,
-                        y,
-                        imgWidth,
-                        imgHeight
-                    );
-
+                    ctx.drawImage(tempCanvas, x, y, imgWidth, imgHeight);
                     ctx.restore();
                 });
 
@@ -715,7 +701,7 @@
         }
 
         async function shareToWhatsApp() {
-            if (!currentPhotoStripDataUrl) {
+            if (!currentPhotoStripDataUrl || !currentPhotoBlob) {
                 Swal.fire({
                     title: 'No Photos Available!',
                     text: 'Please take some photos first before sharing.',
@@ -726,97 +712,134 @@
                 return;
             }
 
+            // Prompt for phone number first
             const { value: phoneNumber } = await Swal.fire({
                 title: 'Share to WhatsApp',
                 html: `
-                    <p style="margin-bottom: 15px; color: #475569;">Enter the phone number to share your photos:</p>
-                    <small style="color: #64748b;">Format: Country code + phone number (e.g., 6281234567890)</small>
+                    <div style="text-align: left; margin-bottom: 20px;">
+                        <p style="margin-bottom: 15px; color: #475569; font-weight: 500;">📱 Share your photos via WhatsApp:</p>
+                        <ol style="color: #64748b; font-size: 14px; line-height: 1.6;">
+                            <li>Enter the phone number below</li>
+                            <li>Your photo will be sent to the number via WhatsApp</li>
+                        </ol>
+                    </div>
+                    <p style="margin-bottom: 10px; color: #475569; font-weight: 500;">Enter phone number:</p>
+                    <small style="color: #64748b;">Format: Country code + phone number (e.g., +6281234567890)</small>
                 `,
                 input: 'text',
-                inputPlaceholder: 'e.g., 6281234567890',
+                inputPlaceholder: 'e.g., +6281234567890',
                 inputAttributes: {
                     maxlength: 15,
-                    pattern: '[0-9]+'
+                    pattern: '[0-9+]+'
                 },
                 showCancelButton: true,
-                confirmButtonText: 'Share 📱',
+                confirmButtonText: '<span class="loading-spinner"></span>Send to WhatsApp',
                 cancelButtonText: 'Cancel',
                 background: 'rgba(255, 255, 255, 0.95)',
                 inputValidator: (value) => {
                     if (!value) {
-                        return 'Please enter a phone number!'
+                        return 'Please enter a phone number!';
                     }
-                    if (!/^\d+$/.test(value)) {
-                        return 'Please enter numbers only!'
+                    if (!/^\+?\d+$/.test(value)) {
+                        return 'Please enter a valid phone number (numbers and optional + only)!';
                     }
-                    if (value.length < 8) {
-                        return 'Phone number is too short!'
+                    if (value.replace('+', '').length < 8) {
+                        return 'Phone number is too short!';
                     }
                     return null;
                 }
             });
 
-            if (phoneNumber) {
-                // Convert image to blob and create a temporary download
+            if (!phoneNumber) {
+                return; // User cancelled
+            }
+
+            // Show loading
+            Swal.fire({
+                title: '<span class="loading-spinner"></span>Preparing to Send...',
+                html: 'Preparing your photo for WhatsApp...',
+                showConfirmButton: false,
+                background: 'rgba(255, 255, 255, 0.95)',
+                allowOutsideClick: false,
+                timer: 3000
+            });
+
+            // Format phone number (remove + for WhatsApp API compatibility)
+            const cleanPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber.slice(1) : phoneNumber;
+
+            // Try Web Share API with file sharing
+            const file = new File([currentPhotoBlob], 'photobooth_memories.png', { type: 'image/png' });
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
-                    const response = await fetch(currentPhotoStripDataUrl);
-                    const blob = await response.blob();
-                    
-                    // Create a temporary download link
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.download = 'photobooth_memories.png';
-                    link.href = url;
-                    link.click();
-                    
-                    // Clean up
-                    URL.revokeObjectURL(url);
-                    
-                    // Open WhatsApp with message
-                    const message = encodeURIComponent("Hi! I've created some amazing photos with Professional PhotoBooth! 📸✨ Check out the download I just sent you! Created by @ryaleason");
-                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-                    
+                    await navigator.share({
+                        title: 'Professional PhotoBooth Memories',
+                        text: 'Amazing photos created with Professional PhotoBooth! 📸✨ Created by @ryaleason',
+                        files: [file],
+                        url: `https://wa.me/${cleanPhoneNumber}`
+                    });
                     Swal.fire({
-                        title: 'Photo Downloaded & WhatsApp Opening!',
-                        html: `
-                            <p>✅ Photo has been downloaded to your device</p>
-                            <p>📱 WhatsApp is opening to send to: +${phoneNumber}</p>
-                            <p style="font-size: 12px; color: #64748b; margin-top: 15px;">
-                                Attach the downloaded image to your WhatsApp message
-                            </p>
-                        `,
+                        title: 'Photo Sent Successfully!',
+                        text: `Your photo has been sent to +${cleanPhoneNumber} via WhatsApp!`,
                         icon: 'success',
                         confirmButtonText: 'Great!',
                         background: 'rgba(255, 255, 255, 0.95)',
-                        timer: 3000
+                        timer: 2000
                     });
-                    
-                    // Small delay to ensure download starts first
-                    setTimeout(() => {
-                        window.open(whatsappUrl, '_blank');
-                    }, 1000);
-                    
+                    return;
                 } catch (error) {
-                    console.error('Error sharing to WhatsApp:', error);
+                    console.error('Web Share API failed:', error);
+                    // Proceed to fallback
+                }
+            }
+
+            // Fallback: Download the photo and open WhatsApp
+            try {
+                const url = URL.createObjectURL(currentPhotoBlob);
+                const link = document.createElement('a');
+                link.download = 'photobooth_memories_by_ryaleason.png';
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                const message = encodeURIComponent("Hi! 👋 I've created some amazing photos with Professional PhotoBooth! 📸✨ Check out the photo I just sent you! Created by @ryaleason");
+                const whatsappUrl = `https://wa.me/${cleanPhoneNumber}?text=${message}`;
+
+                setTimeout(() => {
+                    window.open(whatsappUrl, '_blank');
                     Swal.fire({
-                        title: 'Sharing Error',
-                        text: 'There was an error preparing the photo for sharing. Please try downloading instead.',
-                        icon: 'error',
+                        title: 'Photo Ready to Send!',
+                        html: `
+                            <p>✅ Photo has been downloaded to your device</p>
+                            <p>📱 WhatsApp is opening to send to: +${cleanPhoneNumber}</p>
+                            <p style="font-size: 12px; color: #64748b; margin-top: 15px;">
+                                Please attach the downloaded photo ("photobooth_memories_by_ryaleason.png") in WhatsApp
+                            </p>
+                        `,
+                        icon: 'success',
                         confirmButtonText: 'OK',
                         background: 'rgba(255, 255, 255, 0.95)'
                     });
-                }
+                }, 1000);
+            } catch (error) {
+                console.error('Error sharing to WhatsApp:', error);
+                Swal.fire({
+                    title: 'Sharing Error',
+                    text: 'There was an error preparing the photo for sharing. Please try downloading and sharing manually.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    background: 'rgba(255, 255, 255, 0.95)'
+                });
             }
         }
 
         backgroundColorPicker.addEventListener('input', function () {
             photoStrip.style.backgroundColor = this.value;
-            // Regenerate photo strip when background color changes
             if (photoDetails.length > 0) {
                 generatePhotoStripForSharing();
             }
         });
     </script>
 </body>
-
 </html>
